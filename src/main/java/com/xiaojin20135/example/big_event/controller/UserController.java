@@ -3,6 +3,7 @@ package com.xiaojin20135.example.big_event.controller;
 import com.xiaojin20135.example.big_event.pojo.Result;
 import com.xiaojin20135.example.big_event.pojo.User;
 import com.xiaojin20135.example.big_event.service.UserService;
+import com.xiaojin20135.example.big_event.utils.Md5Util;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -29,7 +30,17 @@ public class UserController {
         } else {
             return Result.error("用户名已被占用");
         }
-        //注册
+    }
 
+    @PostMapping("/login")
+    public Result<String> login(@Pattern(regexp = "^\\S{5,16}$") String username, @Pattern(regexp = "^\\S{5,16}$") String password) {
+        User loginUser = userService.findByUserName(username);
+        if (null == loginUser) {
+            return Result.error("用户名不存在");
+        }
+        if (Md5Util.getMD5String(password).equals(loginUser.getPassword())) {
+            return Result.success("jwt token");
+        }
+        return Result.error("密码错误");
     }
 }
